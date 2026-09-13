@@ -89,10 +89,6 @@ export default function ProblemDetailPage() {
                 <span className="meta-list__label">Category</span>
                 <span>Low-level design</span>
               </li>
-              <li>
-                <span className="meta-list__label">Attempts</span>
-                <span>{problem._count.attempts}</span>
-              </li>
             </ul>
             <Button onClick={start} icon={<Icon name="play" size={16} />} disabled={starting}>
               {starting ? 'Starting…' : 'Start attempt'}
