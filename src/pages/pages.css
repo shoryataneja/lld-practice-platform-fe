@@ -60,27 +60,16 @@
 
 .stats {
   display: grid;
-  grid-template-columns: repeat(3, 1fr);
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
   gap: 16px;
   margin-top: 24px;
 }
 
 .stat {
   display: flex;
-  align-items: center;
-  gap: 14px;
-  padding: 18px 20px;
-}
-
-.stat__icon {
-  display: grid;
-  place-items: center;
-  width: 42px;
-  height: 42px;
-  border-radius: 12px;
-  flex-shrink: 0;
-  background: var(--accent-soft);
-  color: var(--accent-strong);
+  flex-direction: column;
+  gap: 2px;
+  padding: 20px;
 }
 
 .stat__value {

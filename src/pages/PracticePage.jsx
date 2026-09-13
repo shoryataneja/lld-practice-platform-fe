@@ -58,7 +58,6 @@ function Picker() {
               <span className={`badge badge--${difficultyTone[problem.difficulty]}`}>
                 {problem.difficulty}
               </span>
-              <Icon name="pen" size={16} />
             </div>
             <h3 className="problem-card__title">{problem.title}</h3>
             <p className="problem-card__sub">{problem.summary}</p>

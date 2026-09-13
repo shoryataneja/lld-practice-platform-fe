@@ -22,8 +22,8 @@ export default function HomePage() {
   }, [])
 
   const stats = [
-    { label: 'Problems available', value: loading ? '–' : String(problems.length), icon: 'grid' },
-    { label: 'Attempts made', value: attemptCount != null ? String(attemptCount) : '–', icon: 'clock' },
+    { label: 'Problems available', value: loading ? '–' : String(problems.length) },
+    { label: 'Attempts made', value: attemptCount != null ? String(attemptCount) : '–' },
   ]
 
   return (
@@ -53,13 +53,8 @@ export default function HomePage() {
       <section className="stats">
         {stats.map((stat) => (
           <Card key={stat.label} className="stat">
-            <span className="stat__icon">
-              <Icon name={stat.icon} size={20} />
-            </span>
-            <div>
-              <div className="stat__value">{stat.value}</div>
-              <div className="stat__label">{stat.label}</div>
-            </div>
+            <div className="stat__value">{stat.value}</div>
+            <div className="stat__label">{stat.label}</div>
           </Card>
         ))}
       </section>
