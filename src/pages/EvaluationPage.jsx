@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react'
-import { Link, useParams } from 'react-router-dom'
+import { Link, useNavigate, useParams } from 'react-router-dom'
 import Card from '../components/ui/Card'
 import Button from '../components/ui/Button'
 import Badge from '../components/ui/Badge'
@@ -35,9 +35,12 @@ function ScoreRing({ score }) {
 
 export default function EvaluationPage() {
   const { attemptId } = useParams()
+  const navigate = useNavigate()
   const [attempt, setAttempt] = useState(null)
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState(null)
+  const [retrying, setRetrying] = useState(false)
+  const [retryError, setRetryError] = useState(null)
 
   useEffect(() => {
     api
@@ -46,6 +49,18 @@ export default function EvaluationPage() {
       .catch((err) => setError(err.message))
       .finally(() => setLoading(false))
   }, [attemptId])
+
+  async function retry() {
+    setRetrying(true)
+    setRetryError(null)
+    try {
+      const { attempt: newAttempt } = await api.createAttempt(attempt.problem.slug)
+      navigate(`/practice/${newAttempt.id}`)
+    } catch {
+      setRetryError('Could not start a new attempt. Please try again.')
+      setRetrying(false)
+    }
+  }
 
   if (loading) return <div className="empty-note">Loading evaluation…</div>
   if (error) {
@@ -140,13 +155,14 @@ export default function EvaluationPage() {
             })}
           </div>
 
-          <div style={{ marginTop: 24, display: 'flex', gap: 12 }}>
-            <Button to="/practice" icon={<Icon name="play" size={16} />}>
-              Try again
+          <div style={{ marginTop: 24, display: 'flex', gap: 12, alignItems: 'center', flexWrap: 'wrap' }}>
+            <Button icon={<Icon name="play" size={16} />} onClick={retry} disabled={retrying}>
+              {retrying ? 'Starting…' : 'Try again'}
             </Button>
             <Button to="/history" variant="secondary">
               Back to history
             </Button>
+            {retryError && <span className="evaluation-error">{retryError}</span>}
           </div>
         </>
       )}

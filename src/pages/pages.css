@@ -387,6 +387,11 @@
   text-align: center;
 }
 
+.evaluation-error {
+  color: var(--danger);
+  font-size: 13px;
+}
+
 .detail-body--pre {
   white-space: pre-line;
 }
