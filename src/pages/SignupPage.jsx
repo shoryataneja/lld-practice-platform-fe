@@ -1,6 +1,7 @@
 import { useState } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
 import Icon from '../components/Icon'
+import PasswordInput from '../components/ui/PasswordInput'
 import { useAuth } from '../context/AuthContext'
 import './auth.css'
 
@@ -75,10 +76,8 @@ export default function SignupPage() {
 
           <div className="auth-field">
             <label htmlFor="signup-password">Password</label>
-            <input
+            <PasswordInput
               id="signup-password"
-              className="auth-input"
-              type="password"
               value={password}
               onChange={(e) => setPassword(e.target.value)}
               placeholder="At least 8 characters"

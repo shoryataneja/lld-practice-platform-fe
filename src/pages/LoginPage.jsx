@@ -1,6 +1,7 @@
 import { useState } from 'react'
 import { Link, useNavigate, useLocation } from 'react-router-dom'
 import Icon from '../components/Icon'
+import PasswordInput from '../components/ui/PasswordInput'
 import { useAuth } from '../context/AuthContext'
 import './auth.css'
 
@@ -62,10 +63,8 @@ export default function LoginPage() {
 
           <div className="auth-field">
             <label htmlFor="login-password">Password</label>
-            <input
+            <PasswordInput
               id="login-password"
-              className="auth-input"
-              type="password"
               value={password}
               onChange={(e) => setPassword(e.target.value)}
               placeholder="Your password"
