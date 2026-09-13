@@ -1,17 +1,39 @@
+import { useEffect, useState } from 'react'
 import Card from '../components/ui/Card'
 import Button from '../components/ui/Button'
 import Icon from '../components/Icon'
-import { problems } from '../data/problems'
-
-const stats = [
-  { label: 'Problems available', value: '5', icon: 'grid' },
-  { label: 'Attempts made', value: '12', icon: 'clock' },
-  { label: 'Average score', value: '68%', icon: 'target' },
-]
+import { api } from '../api'
 
 const difficultyTone = { EASY: 'success', MEDIUM: 'accent', HARD: 'danger' }
 
 export default function HomePage() {
+  const [problems, setProblems] = useState([])
+  const [attemptCount, setAttemptCount] = useState(null)
+  const [averageScore, setAverageScore] = useState(null)
+  const [loading, setLoading] = useState(true)
+
+  useEffect(() => {
+    Promise.all([api.getProblems(), api.getAttempts()])
+      .then(([problemsData, attemptsData]) => {
+        setProblems(problemsData.problems)
+        setAttemptCount(attemptsData.attempts.length)
+        const scores = attemptsData.attempts
+          .map((attempt) => attempt.score)
+          .filter((score) => score != null)
+        if (scores.length > 0) {
+          setAverageScore(Math.round(scores.reduce((sum, score) => sum + score, 0) / scores.length))
+        }
+      })
+      .catch(() => {})
+      .finally(() => setLoading(false))
+  }, [])
+
+  const stats = [
+    { label: 'Problems available', value: loading ? '–' : String(problems.length), icon: 'grid' },
+    { label: 'Attempts made', value: attemptCount != null ? String(attemptCount) : '–', icon: 'clock' },
+    { label: 'Average score', value: averageScore != null ? `${averageScore}%` : '–', icon: 'target' },
+  ]
+
   return (
     <>
       <section className="hero-panel card">
@@ -57,25 +79,31 @@ export default function HomePage() {
             View all
           </Button>
         </div>
-        <div className="card-grid">
-          {problems.slice(0, 3).map((problem) => (
-            <Card key={problem.slug} className="problem-card card--hover">
-              <div className="problem-card__top">
-                <span className={`badge badge--${difficultyTone[problem.difficulty]}`}>
-                  {problem.difficulty}
-                </span>
-                <Icon name="arrowRight" size={16} />
-              </div>
-              <h3 className="problem-card__title">{problem.title}</h3>
-              <p className="problem-card__sub">{problem.summary}</p>
-              <div className="problem-card__footer">
-                <Button to={`/problems/${problem.slug}`} variant="secondary" size="sm">
-                  View problem
-                </Button>
-              </div>
-            </Card>
-          ))}
-        </div>
+        {loading ? (
+          <div className="empty-note">Loading problems…</div>
+        ) : problems.length === 0 ? (
+          <div className="empty-note">No problems published yet.</div>
+        ) : (
+          <div className="card-grid">
+            {problems.slice(0, 3).map((problem) => (
+              <Card key={problem.slug} className="problem-card card--hover">
+                <div className="problem-card__top">
+                  <span className={`badge badge--${difficultyTone[problem.difficulty]}`}>
+                    {problem.difficulty}
+                  </span>
+                  <Icon name="arrowRight" size={16} />
+                </div>
+                <h3 className="problem-card__title">{problem.title}</h3>
+                <p className="problem-card__sub">{problem.summary}</p>
+                <div className="problem-card__footer">
+                  <Button to={`/problems/${problem.slug}`} variant="secondary" size="sm">
+                    View problem
+                  </Button>
+                </div>
+              </Card>
+            ))}
+          </div>
+        )}
       </section>
     </>
   )
