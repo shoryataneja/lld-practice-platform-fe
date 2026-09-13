@@ -9,7 +9,6 @@ const difficultyTone = { EASY: 'success', MEDIUM: 'accent', HARD: 'danger' }
 export default function HomePage() {
   const [problems, setProblems] = useState([])
   const [attemptCount, setAttemptCount] = useState(null)
-  const [averageScore, setAverageScore] = useState(null)
   const [loading, setLoading] = useState(true)
 
   useEffect(() => {
@@ -17,12 +16,6 @@ export default function HomePage() {
       .then(([problemsData, attemptsData]) => {
         setProblems(problemsData.problems)
         setAttemptCount(attemptsData.attempts.length)
-        const scores = attemptsData.attempts
-          .map((attempt) => attempt.score)
-          .filter((score) => score != null)
-        if (scores.length > 0) {
-          setAverageScore(Math.round(scores.reduce((sum, score) => sum + score, 0) / scores.length))
-        }
       })
       .catch(() => {})
       .finally(() => setLoading(false))
@@ -31,7 +24,6 @@ export default function HomePage() {
   const stats = [
     { label: 'Problems available', value: loading ? '–' : String(problems.length), icon: 'grid' },
     { label: 'Attempts made', value: attemptCount != null ? String(attemptCount) : '–', icon: 'clock' },
-    { label: 'Average score', value: averageScore != null ? `${averageScore}%` : '–', icon: 'target' },
   ]
 
   return (
