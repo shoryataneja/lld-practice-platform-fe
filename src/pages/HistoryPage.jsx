@@ -63,7 +63,6 @@ export default function HistoryPage() {
             <thead>
               <tr>
                 <th>Problem</th>
-                <th>Attempt</th>
                 <th>Score</th>
                 <th>Status</th>
                 <th>Date</th>
@@ -75,9 +74,8 @@ export default function HistoryPage() {
                 <tr key={attempt.id}>
                   <td>
                     <div className="table__cell-title">{attempt.problem.title}</div>
-                    <div className="table__cell-sub">Attempt #{attempt.attemptNumber}</div>
-                  </td>
-                  <td>{attempt.attemptNumber}</td>
+<div className="table__cell-sub">Attempt #{attempt.attemptNumber}</div>
+                    </td>
                   <td>{attempt.score != null ? `${attempt.score}/100` : '—'}</td>
                   <td>
                     <Badge tone={statusTone[attempt.status]}>{attempt.status}</Badge>
