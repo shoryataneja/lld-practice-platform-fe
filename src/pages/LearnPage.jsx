@@ -2,6 +2,7 @@ import Card from '../components/ui/Card'
 import Badge from '../components/ui/Badge'
 import PageHeader from '../components/ui/PageHeader'
 import Icon from '../components/Icon'
+import { useSearch } from '../context/SearchContext'
 
 const topics = [
   { name: 'OOP', icon: 'target', sub: 'Encapsulation, inheritance, polymorphism and how they shape designs.' },
@@ -13,6 +14,13 @@ const topics = [
 ]
 
 export default function LearnPage() {
+  const { query } = useSearch()
+  const q = query.trim().toLowerCase()
+  const visible = topics.filter((topic) => {
+    if (!q) return true
+    return `${topic.name} ${topic.sub}`.toLowerCase().includes(q)
+  })
+
   return (
     <>
       <PageHeader
@@ -21,7 +29,7 @@ export default function LearnPage() {
       />
 
       <div className="card-grid">
-        {topics.map((topic) => (
+        {visible.map((topic) => (
           <Card key={topic.name} className="learn-card card--hover">
             <span className="learn-card__icon">
               <Icon name={topic.icon} size={20} />
@@ -34,6 +42,7 @@ export default function LearnPage() {
           </Card>
         ))}
       </div>
+      {visible.length === 0 && <div className="empty-note">No topics match your search.</div>}
     </>
   )
 }

@@ -11,6 +11,7 @@ import NotFoundPage from './pages/NotFoundPage'
 import LoginPage from './pages/LoginPage'
 import SignupPage from './pages/SignupPage'
 import { useAuth } from './context/AuthContext'
+import { SearchProvider } from './context/SearchContext'
 import './components/ui/ui.css'
 import './components/layout/layout.css'
 import './pages/pages.css'
@@ -38,23 +39,25 @@ function RequireAuth() {
 export default function App() {
   return (
     <BrowserRouter>
-      <Routes>
-        <Route path="/login" element={<LoginPage />} />
-        <Route path="/signup" element={<SignupPage />} />
-        <Route element={<RequireAuth />}>
-          <Route element={<AppLayout />}>
-            <Route index element={<HomePage />} />
-            <Route path="problems" element={<ProblemsPage />} />
-            <Route path="problems/:slug" element={<ProblemDetailPage />} />
-            <Route path="learn" element={<LearnPage />} />
-            <Route path="practice" element={<PracticePage />} />
-            <Route path="practice/:attemptId" element={<PracticePage />} />
-            <Route path="history" element={<HistoryPage />} />
-            <Route path="evaluation/:attemptId" element={<EvaluationPage />} />
-            <Route path="*" element={<NotFoundPage />} />
+      <SearchProvider>
+        <Routes>
+          <Route path="/login" element={<LoginPage />} />
+          <Route path="/signup" element={<SignupPage />} />
+          <Route element={<RequireAuth />}>
+            <Route element={<AppLayout />}>
+              <Route index element={<HomePage />} />
+              <Route path="problems" element={<ProblemsPage />} />
+              <Route path="problems/:slug" element={<ProblemDetailPage />} />
+              <Route path="learn" element={<LearnPage />} />
+              <Route path="practice" element={<PracticePage />} />
+              <Route path="practice/:attemptId" element={<PracticePage />} />
+              <Route path="history" element={<HistoryPage />} />
+              <Route path="evaluation/:attemptId" element={<EvaluationPage />} />
+              <Route path="*" element={<NotFoundPage />} />
+            </Route>
           </Route>
-        </Route>
-      </Routes>
+        </Routes>
+      </SearchProvider>
     </BrowserRouter>
   )
 }

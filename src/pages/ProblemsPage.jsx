@@ -2,9 +2,9 @@ import { useEffect, useState } from 'react'
 import Card from '../components/ui/Card'
 import Button from '../components/ui/Button'
 import PageHeader from '../components/ui/PageHeader'
-import SearchBar from '../components/ui/SearchBar'
 import Icon from '../components/Icon'
 import { api } from '../api'
+import { useSearch } from '../context/SearchContext'
 
 const difficultyTone = { EASY: 'success', MEDIUM: 'accent', HARD: 'danger' }
 const filters = ['All', 'Easy', 'Medium', 'Hard']
@@ -15,7 +15,7 @@ export default function ProblemsPage() {
   const [problems, setProblems] = useState([])
   const [loading, setLoading] = useState(true)
   const [active, setActive] = useState('All')
-  const [query, setQuery] = useState('')
+  const { query } = useSearch()
 
   useEffect(() => {
     api
@@ -51,7 +51,6 @@ export default function ProblemsPage() {
             </button>
           ))}
         </div>
-        <SearchBar placeholder="Search problems…" value={query} onChange={(e) => setQuery(e.target.value)} />
       </div>
 
       {loading ? (

@@ -1,8 +1,9 @@
 import { useEffect, useRef, useState } from 'react'
-import { useNavigate } from 'react-router-dom'
+import { useLocation, useNavigate } from 'react-router-dom'
 import Icon from '../Icon'
 import SearchBar from '../ui/SearchBar'
 import { useAuth } from '../../context/AuthContext'
+import { isSearchable, useSearch } from '../../context/SearchContext'
 
 function initials(name) {
   return (name || '?')
@@ -14,6 +15,8 @@ function initials(name) {
 
 export default function Header() {
   const { user, logout } = useAuth()
+  const { pathname } = useLocation()
+  const { query, setQuery } = useSearch()
   const navigate = useNavigate()
   const [menuOpen, setMenuOpen] = useState(false)
   const menuRef = useRef(null)
@@ -36,12 +39,15 @@ export default function Header() {
 
   return (
     <header className="header">
-      <SearchBar placeholder="Search problems, topics…" className="header__search" />
+      {isSearchable(pathname) && (
+        <SearchBar
+          placeholder="Search…"
+          className="header__search"
+          value={query}
+          onChange={(e) => setQuery(e.target.value)}
+        />
+      )}
       <div className="header__right">
-        <button type="button" className="icon-btn" aria-label="Notifications">
-          <Icon name="bell" size={20} />
-          <span className="icon-btn__dot" />
-        </button>
         <div className="header__menu" ref={menuRef}>
           <button
             type="button"

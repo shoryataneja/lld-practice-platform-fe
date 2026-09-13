@@ -171,16 +171,6 @@
   color: var(--text);
 }
 
-.icon-btn__dot {
-  position: absolute;
-  top: 9px;
-  right: 11px;
-  width: 7px;
-  height: 7px;
-  border-radius: 50%;
-  background: var(--accent);
-}
-
 .header__avatar {
   display: block;
   font-size: 13px;

@@ -5,6 +5,7 @@ import Badge from '../components/ui/Badge'
 import PageHeader from '../components/ui/PageHeader'
 import Icon from '../components/Icon'
 import { api } from '../api'
+import { useSearch } from '../context/SearchContext'
 
 const statusTone = {
   COMPLETED: 'success',
@@ -23,6 +24,7 @@ export default function HistoryPage() {
   const [attempts, setAttempts] = useState([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState(null)
+  const { query } = useSearch()
 
   useEffect(() => {
     api
@@ -31,6 +33,12 @@ export default function HistoryPage() {
       .catch((err) => setError(err.message))
       .finally(() => setLoading(false))
   }, [])
+
+  const q = query.trim().toLowerCase()
+  const visible = attempts.filter((attempt) => {
+    if (!q) return true
+    return `${attempt.problem.title} ${attempt.status}`.toLowerCase().includes(q)
+  })
 
   return (
     <>
@@ -47,6 +55,8 @@ export default function HistoryPage() {
         <div className="empty-note">
           No attempts yet — start one from the problems page.
         </div>
+      ) : visible.length === 0 ? (
+        <div className="empty-note">No history matches your search.</div>
       ) : (
         <Card className="table-card">
           <table className="table">
@@ -61,7 +71,7 @@ export default function HistoryPage() {
               </tr>
             </thead>
             <tbody>
-              {attempts.map((attempt) => (
+              {visible.map((attempt) => (
                 <tr key={attempt.id}>
                   <td>
                     <div className="table__cell-title">{attempt.problem.title}</div>
