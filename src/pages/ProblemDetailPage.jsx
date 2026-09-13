@@ -1,25 +1,56 @@
-import { Link, useParams } from 'react-router-dom'
+import { useEffect, useState } from 'react'
+import { Link, useNavigate, useParams } from 'react-router-dom'
 import Card from '../components/ui/Card'
 import Button from '../components/ui/Button'
 import Badge from '../components/ui/Badge'
 import Icon from '../components/Icon'
-import { getProblemBySlug, problems } from '../data/problems'
+import { api } from '../api'
+
+const difficultyTone = { EASY: 'success', MEDIUM: 'accent', HARD: 'danger' }
 
 export default function ProblemDetailPage() {
   const { slug } = useParams()
-  const problem = getProblemBySlug(slug)
+  const navigate = useNavigate()
+  const [problem, setProblem] = useState(null)
+  const [related, setRelated] = useState([])
+  const [loading, setLoading] = useState(true)
+  const [error, setError] = useState(null)
+  const [starting, setStarting] = useState(false)
 
-  if (!problem) {
+  useEffect(() => {
+    api
+      .getProblem(slug)
+      .then(({ problem }) => setProblem(problem))
+      .catch((err) => setError(err.message))
+      .finally(() => setLoading(false))
+    api.getProblems().then((data) => setRelated(data.problems)).catch(() => {})
+  }, [slug])
+
+  async function start() {
+    setStarting(true)
+    try {
+      const { attempt } = await api.createAttempt(slug)
+      navigate(`/practice/${attempt.id}`)
+    } catch (err) {
+      setError(err.message)
+      setStarting(false)
+    }
+  }
+
+  if (loading) return <div className="empty-note">Loading problem…</div>
+  if (error) {
     return (
       <div className="notfound">
         <h1>Problem not found</h1>
-        <p>The problem you are looking for does not exist.</p>
+        <p>{error}</p>
         <Button to="/problems" variant="secondary">
           Back to problems
         </Button>
       </div>
     )
   }
+
+  const paragraphs = problem.description.split('\n')
 
   return (
     <>
@@ -38,39 +69,12 @@ export default function ProblemDetailPage() {
       <div className="detail-grid">
         <div>
           <Card className="detail-card">
-            <h2>Background</h2>
-            <div className="detail-body">
-              <p>
-                {problem.title} is a classic low-level design scenario. You are expected to
-                identify the core entities, assign clear responsibilities, and model the
-                key relationships before worry about implementation details.
-              </p>
-              <p>
-                There is no single correct answer. The evaluation rewards clean
-                separation of concerns, sensible use of interfaces and abstractions, and
-                designs that are easy to extend.
-              </p>
+            <h2>Problem brief</h2>
+            <div className="detail-body detail-body--pre">
+              {paragraphs.map((paragraph, index) => (
+                <p key={index}>{paragraph}</p>
+              ))}
             </div>
-          </Card>
-
-          <Card className="detail-card" style={{ marginTop: 16 }}>
-            <h2>Key requirements</h2>
-            <ul className="detail-list">
-              <li>Identify the primary actors and their interactions with the system.</li>
-              <li>Define the core classes and the responsibility of each class.</li>
-              <li>Model relationships and ownership between classes.</li>
-              <li>Handle basic edge cases gracefully (empty state, invalid input, limits).</li>
-              <li>Keep the design extensible for new features.</li>
-            </ul>
-          </Card>
-
-          <Card className="detail-card" style={{ marginTop: 16 }}>
-            <h2>Constraints</h2>
-            <ul className="detail-list">
-              <li>Focus on the conceptual model — persistence and UI are out of scope.</li>
-              <li>Prefer composition and interfaces over deep inheritance chains.</li>
-              <li>Assume a single process; distributed concerns are not required.</li>
-            </ul>
           </Card>
         </div>
 
@@ -79,36 +83,33 @@ export default function ProblemDetailPage() {
             <ul className="meta-list">
               <li>
                 <span className="meta-list__label">Difficulty</span>
-                <Badge tone="accent">{problem.difficulty}</Badge>
+                <Badge tone={difficultyTone[problem.difficulty]}>{problem.difficulty}</Badge>
               </li>
               <li>
                 <span className="meta-list__label">Category</span>
-                <span>System design</span>
+                <span>Low-level design</span>
               </li>
               <li>
                 <span className="meta-list__label">Attempts</span>
-                <span>—</span>
+                <span>{problem._count.attempts}</span>
               </li>
             </ul>
-            <Button to="/practice" icon={<Icon name="play" size={16} />}>
-              Start attempt
+            <Button onClick={start} icon={<Icon name="play" size={16} />} disabled={starting}>
+              {starting ? 'Starting…' : 'Start attempt'}
             </Button>
           </Card>
 
           <Card className="detail-card">
             <h2>Related problems</h2>
             <ul className="detail-list">
-              {problems
+              {related
                 .filter((item) => item.slug !== problem.slug)
                 .slice(0, 3)
-                .map((item) => {
-                  const slug = `/problems/${item.slug}`
-                  return (
-                    <li key={item.slug}>
-                      <Link to={slug}>{item.title}</Link>
-                    </li>
-                  )
-                })}
+                .map((item) => (
+                  <li key={item.slug}>
+                    <Link to={`/problems/${item.slug}`}>{item.title}</Link>
+                  </li>
+                ))}
             </ul>
           </Card>
         </aside>
