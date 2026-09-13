@@ -1,16 +1,34 @@
-# React + Vite
+# lld-practice-platform-fe
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+Frontend for the LLD Lab learning platform — React + Vite single-page app.
 
-Currently, two official plugins are available:
+## Setup
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Oxc](https://oxc.rs)
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/)
+```bash
+npm install
+npm run dev
+```
 
-## React Compiler
+Dev server runs on `http://localhost:5173` and proxies `/api` to the backend at `http://localhost:4000`. Start the backend first (`npm run dev` in `lld-practice-platform-be`).
 
-The React Compiler is not enabled on this template because of its impact on dev & build performances. To add it, see [this documentation](https://react.dev/learn/react-compiler/installation).
+## Auth
 
-## Expanding the ESLint configuration
+The app uses cookie sessions set by the backend (`api.js` sends `credentials: 'include'` on every request, which is transparent through the Vite proxy in dev).
 
-If you are developing a production application, we recommend using TypeScript with type-aware lint rules enabled. Check out the [TS template](https://github.com/vitejs/vite/tree/main/packages/create-vite/template-react-ts) for information on how to integrate TypeScript and [`typescript-eslint`](https://typescript-eslint.io) in your project.
+- Public pages: `/login` and `/signup`.
+- All other routes are wrapped in `RequireAuth`; unauthenticated visitors are redirected to `/login`.
+- The session is restored on load via `GET /api/auth/me` (see `src/context/AuthContext.jsx`).
+- The header account menu and sidebar footer show the real user and provide log out.
+
+Demo login (from the seed): `demo@lld.dev` / `demo1234`.
+
+## Scripts
+
+```bash
+npm run dev      # start dev server (http://localhost:5173)
+npm run build    # production build to dist/
+npm run lint     # eslint
+npm run preview  # preview the production build
+```
+
+In production the app should be served from a URL whose origin matches the backend's `CORS_ORIGIN` allow list (see backend README).
