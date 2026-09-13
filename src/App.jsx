@@ -22,6 +22,7 @@ export default function App() {
           <Route path="problems/:slug" element={<ProblemDetailPage />} />
           <Route path="learn" element={<LearnPage />} />
           <Route path="practice" element={<PracticePage />} />
+          <Route path="practice/:attemptId" element={<PracticePage />} />
           <Route path="history" element={<HistoryPage />} />
           <Route path="evaluation/:attemptId" element={<EvaluationPage />} />
           <Route path="*" element={<NotFoundPage />} />

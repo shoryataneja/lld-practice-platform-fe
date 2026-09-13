@@ -356,6 +356,41 @@
   font-size: 13px;
 }
 
+.section-row--stack {
+  flex-direction: column;
+  align-items: stretch;
+}
+
+.section-textarea {
+  width: 100%;
+  min-height: 120px;
+  padding: 12px 14px;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  background: var(--surface-soft);
+  color: var(--text);
+  font: inherit;
+  font-size: 14px;
+  line-height: 1.6;
+  resize: vertical;
+}
+
+.section-textarea:focus {
+  outline: none;
+  border-color: var(--accent);
+  box-shadow: 0 0 0 2px var(--accent-soft);
+}
+
+.empty-note {
+  padding: 24px;
+  color: var(--muted);
+  text-align: center;
+}
+
+.detail-body--pre {
+  white-space: pre-line;
+}
+
 /* ---------- Learn ---------- */
 
 .learn-card {
