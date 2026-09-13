@@ -8,14 +8,18 @@ import Icon from '../components/Icon'
 import { api } from '../api'
 
 const sections = [
-  { key: 'requirements', name: 'Requirements understanding', hint: 'Restate the core requirements in your own words' },
-  { key: 'assumptions', name: 'Assumptions', hint: 'What did you assume about scope, scale or behaviour?' },
-  { key: 'classes', name: 'Classes', hint: 'List the core classes in your design' },
-  { key: 'responsibilities', name: 'Responsibilities', hint: 'Which class owns which behaviour?' },
-  { key: 'relationships', name: 'Relationships', hint: 'How do the classes connect: composed, referenced, inherited?' },
-  { key: 'decisions', name: 'Design decisions & trade-offs', hint: 'Why this shape over alternatives?' },
-  { key: 'code', name: 'Code (optional)', hint: 'Sketch key class skeletons' },
+  { key: 'requirements', name: 'Requirements & Assumptions', hint: 'Restate the core requirements and note any scope, scale or behaviour assumptions.' },
+  { key: 'classes', name: 'Classes, Responsibilities & Relationships', hint: 'List the core classes, what each owns, and how they connect: composition, references, inheritance.' },
+  { key: 'decisions', name: 'Design / Reasoning / Trade-offs', hint: 'Explain the key design choices, why this shape over alternatives, and the trade-offs you accepted.' },
+  { key: 'code', name: 'Code (optional)', hint: 'Optional — sketch key class skeletons (interfaces, fields, methods).' },
 ]
+
+const LEGACY_SECTION_MAP = {
+  requirements: ['requirements', 'assumptions'],
+  classes: ['classes', 'responsibilities', 'relationships'],
+  decisions: ['decisions'],
+  code: ['code'],
+}
 
 const difficultyTone = { EASY: 'success', MEDIUM: 'accent', HARD: 'danger' }
 const statusTone = { DRAFT: 'neutral', SUBMITTED: 'accent', EVALUATING: 'accent', COMPLETED: 'success', FAILED: 'danger' }
@@ -94,8 +98,15 @@ function Workspace() {
       .getAttempt(attemptId)
       .then(({ attempt }) => {
         setAttempt(attempt)
+        const stored = attempt.submission?.sections || []
+        const byKey = new Map(stored.map((section) => [section.key, section.content]))
         const initial = {}
-        for (const section of attempt.submission?.sections || []) initial[section.key] = section.content
+        for (const section of sections) {
+          const parts = (LEGACY_SECTION_MAP[section.key] || [section.key])
+            .map((key) => byKey.get(key))
+            .filter((content) => content && content.trim())
+          if (parts.length) initial[section.key] = parts.join('\n\n')
+        }
         setValues(initial)
       })
       .catch((err) => setError(err.message))
@@ -107,14 +118,15 @@ function Workspace() {
     setMessage(null)
   }
 
+  function buildPayload() {
+    return sections.map((section) => ({ key: section.key, content: values[section.key] || '' }))
+  }
+
   async function saveDraft() {
     setSaving(true)
     setMessage(null)
     try {
-      await api.saveSections(
-        attemptId,
-        sections.map((section) => ({ key: section.key, content: values[section.key] || '' }))
-      )
+      await api.saveSections(attemptId, buildPayload())
       setMessage('Draft saved.')
     } catch (err) {
       setMessage(`Could not save: ${err.message}`)
@@ -127,6 +139,7 @@ function Workspace() {
     setSubmitting(true)
     setMessage(null)
     try {
+      await api.saveSections(attemptId, buildPayload())
       const { attempt } = await api.submitAttempt(attemptId)
       navigate(`/evaluation/${attempt.id}`)
     } catch (err) {
