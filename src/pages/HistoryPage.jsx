@@ -1,25 +1,37 @@
+import { useEffect, useState } from 'react'
 import { Link } from 'react-router-dom'
 import Card from '../components/ui/Card'
 import Badge from '../components/ui/Badge'
 import PageHeader from '../components/ui/PageHeader'
 import Icon from '../components/Icon'
-
-const attempts = [
-  { id: 'a-101', problem: 'Parking Lot', attempt: 2, score: 82, status: 'COMPLETED', date: 'Sep 12, 2026' },
-  { id: 'a-102', problem: 'Parking Lot', attempt: 1, score: 58, status: 'COMPLETED', date: 'Sep 10, 2026' },
-  { id: 'a-103', problem: 'Vending Machine', attempt: 1, score: null, status: 'EVALUATING', date: 'Sep 13, 2026' },
-  { id: 'a-104', problem: 'Elevator', attempt: 1, score: null, status: 'DRAFT', date: 'Sep 9, 2026' },
-  { id: 'a-105', problem: 'Movie Ticket Booking', attempt: 1, score: 71, status: 'COMPLETED', date: 'Aug 30, 2026' },
-]
+import { api } from '../api'
 
 const statusTone = {
   COMPLETED: 'success',
   EVALUATING: 'accent',
+  SUBMITTED: 'accent',
   DRAFT: 'neutral',
   FAILED: 'danger',
 }
 
+function formatDate(value) {
+  if (!value) return '—'
+  return new Date(value).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })
+}
+
 export default function HistoryPage() {
+  const [attempts, setAttempts] = useState([])
+  const [loading, setLoading] = useState(true)
+  const [error, setError] = useState(null)
+
+  useEffect(() => {
+    api
+      .getAttempts()
+      .then((data) => setAttempts(data.attempts))
+      .catch((err) => setError(err.message))
+      .finally(() => setLoading(false))
+  }, [])
+
   return (
     <>
       <PageHeader
@@ -27,49 +39,61 @@ export default function HistoryPage() {
         subtitle="Review past attempts and see how your designs improve over time."
       />
 
-      <Card className="table-card">
-        <table className="table">
-          <thead>
-            <tr>
-              <th>Problem</th>
-              <th>Attempt</th>
-              <th>Score</th>
-              <th>Status</th>
-              <th>Date</th>
-              <th></th>
-            </tr>
-          </thead>
-          <tbody>
-            {attempts.map((attempt) => (
-              <tr key={attempt.id}>
-                <td>
-                  <div className="table__cell-title">{attempt.problem}</div>
-                  <div className="table__cell-sub">Attempt #{attempt.attempt}</div>
-                </td>
-                <td>{attempt.attempt}</td>
-                <td>{attempt.score !== null ? `${attempt.score}/100` : '—'}</td>
-                <td>
-                  <Badge tone={statusTone[attempt.status]}>{attempt.status}</Badge>
-                </td>
-                <td>{attempt.date}</td>
-                <td style={{ textAlign: 'right' }}>
-                  {attempt.status === 'COMPLETED' ? (
-                    <Link
-                      to={`/evaluation/${attempt.id}`}
-                      className="table__link"
-                    >
-                      View feedback
-                      <Icon name="arrowRight" size={15} />
-                    </Link>
-                  ) : (
-                    <span className="table__cell-sub">—</span>
-                  )}
-                </td>
+      {loading ? (
+        <div className="empty-note">Loading history…</div>
+      ) : error ? (
+        <div className="empty-note">{error}</div>
+      ) : attempts.length === 0 ? (
+        <div className="empty-note">
+          No attempts yet — start one from the problems page.
+        </div>
+      ) : (
+        <Card className="table-card">
+          <table className="table">
+            <thead>
+              <tr>
+                <th>Problem</th>
+                <th>Attempt</th>
+                <th>Score</th>
+                <th>Status</th>
+                <th>Date</th>
+                <th></th>
               </tr>
-            ))}
-          </tbody>
-        </table>
-      </Card>
+            </thead>
+            <tbody>
+              {attempts.map((attempt) => (
+                <tr key={attempt.id}>
+                  <td>
+                    <div className="table__cell-title">{attempt.problem.title}</div>
+                    <div className="table__cell-sub">Attempt #{attempt.attemptNumber}</div>
+                  </td>
+                  <td>{attempt.attemptNumber}</td>
+                  <td>{attempt.score != null ? `${attempt.score}/100` : '—'}</td>
+                  <td>
+                    <Badge tone={statusTone[attempt.status]}>{attempt.status}</Badge>
+                  </td>
+                  <td>{formatDate(attempt.createdAt)}</td>
+                  <td style={{ textAlign: 'right' }}>
+                    {attempt.status === 'COMPLETED' ? (
+                      <Link to={`/evaluation/${attempt.id}`} className="table__link">
+                        View feedback
+                        <Icon name="arrowRight" size={15} />
+                      </Link>
+                    ) : attempt.status === 'DRAFT' ? (
+                      <Link to={`/practice/${attempt.id}`} className="table__link">
+                        Resume
+                        <Icon name="arrowRight" size={15} />
+                      </Link>
+                    ) : (
+                      <span className="table__cell-sub">—</span>
+                    )}
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </Card>
+      )}
     </>
   )
 }
